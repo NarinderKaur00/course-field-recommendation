@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% set active = 'models' %}
+{% block title %}Model Insights · EduPath{% endblock %}
+{% block page_title %}Model Insights{% endblock %}
+{% block page_sub %}How accurate the prediction models are, per elective{% endblock %}
+
+{% block content %}
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-ico green">🎯</div>
+    <div><div class="stat-num">{{ avg }}%</div><div class="stat-lbl">Average accuracy</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-ico blue">📚</div>
+    <div><div class="stat-num">{{ n_subjects }}</div><div class="stat-lbl">Input subjects</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-ico purple">🤖</div>
+    <div><div class="stat-num">{{ perf|length }}</div><div class="stat-lbl">Trained models (XGBoost)</div></div>
+  </div>
+</div>
+
+<section class="panel">
+  <h3 class="panel-title">Accuracy by elective</h3>
+  <p class="muted small">Each elective has its own XGBoost model. Accuracy is measured on held-out test data.</p>
+  <div class="perf-list">
+    {% for p in perf %}
+    <div class="perf-row">
+      <span class="perf-subj" title="{{ p['name'] }} · {{ p['field'] }}">{{ p['subject'] }}</span>
+      <div class="perf-bar">
+        <span class="{{ 'good' if p['accuracy']>=80 else ('ok' if p['accuracy']>=70 else 'low') }}"
+              style="width: {{ p['accuracy'] }}%"></span>
+      </div>
+      <span class="perf-val">{{ p['accuracy'] }}%</span>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="panel info-panel">
+  <h3 class="panel-title">ℹ️ How the recommendation is made</h3>
+  <ol class="info-steps">
+    <li><strong>Preprocess</strong> — your marks are converted into grade categories (A+ … E).</li>
+    <li><strong>Predict</strong> — 14 XGBoost models each predict your grade in one elective.</li>
+    <li><strong>Rank</strong> — electives are sorted by predicted grade (best first).</li>
+    <li><strong>Recommend</strong> — the top electives become your personalised suggestions.</li>
+  </ol>
+</section>
+
+{% endblock %}

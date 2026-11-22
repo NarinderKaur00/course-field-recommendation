@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% set active = 'courses' %}
+{% block title %}{{ course['code'] }} · EduPath{% endblock %}
+{% block page_title %}{{ course['code'] }} — {{ course['name'] }}{% endblock %}
+{% block page_sub %}{{ course['where'] }} · {{ course['category_name'] }} · {{ course['ltp'] }} · {{ course['cr'] }} credits{% endblock %}
+
+{% block content %}
+
+<div class="course-head">
+  {% if course.get('predicted_field') %}
+    <span class="field-chip">{{ course['predicted_icon'] }} Elective in {{ course['predicted_field'] }}</span>
+  {% endif %}
+  <div class="course-head-actions">
+    {% if enrolled %}
+      <span class="badge-enrolled">✅ In My Learning</span>
+      <form method="post" action="{{ url_for('unenroll', code=course['code']) }}" style="display:inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-ghost btn-sm">Remove</button>
+      </form>
+    {% else %}
+      <form method="post" action="{{ url_for('enroll', code=course['code']) }}" style="display:inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-primary btn-sm">➕ Add to My Learning</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+{% if course['objective'] %}
+<section class="panel">
+  <h3 class="panel-title">🎯 Course objective</h3>
+  <p>{{ course['objective'] }}</p>
+</section>
+{% endif %}
+
+<div class="grid-2">
+  <!-- Syllabus / progress -->
+  <section class="panel">
+    <h3 class="panel-title">📋 Syllabus topics</h3>
+    {% if course['topics'] %}
+      <form method="post" action="{{ url_for('save_progress', code=course['code']) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="score-bar" style="margin-bottom:12px"><span style="width: {{ pct }}%"></span></div>
+        <p class="muted small" style="margin-bottom:10px">{{ pct }}% complete — tick topics as you finish them.</p>
+        <ul class="topic-list">
+          {% for t in course['topics'] %}
+          <li>
+            <label class="topic-check">
+              <input type="checkbox" name="t{{ loop.index0 }}" {{ 'checked' if loop.index0 in done }}>
+              <span>{{ t }}</span>
+            </label>
+          </li>
+          {% endfor %}
+        </ul>
+        <button class="btn btn-primary btn-sm" style="margin-top:12px">💾 Save progress</button>
+      </form>
+    {% else %}
+      <p class="muted">Detailed topic breakdown coming soon for this course.</p>
+    {% endif %}
+  </section>
+
+  <!-- Resources + books -->
+  <section class="panel">
+    <h3 class="panel-title">🎓 Learn &amp; practice</h3>
+    <div class="res-list">
+      {% for r in course['resources'] %}
+        <a href="{{ r['url'] }}" target="_blank" rel="noopener" class="res-link">
+          <span class="res-ico">{{ r['icon'] }}</span> {{ r['label'] }}
+          <span class="res-ext">↗</span>
+        </a>
+      {% endfor %}
+    </div>
+
+    {% if course['textbooks'] %}
+    <h3 class="panel-title" style="margin-top:18px">📚 Textbooks</h3>
+    <ul class="book-list">
+      {% for b in course['textbooks'] %}<li>{{ b }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+  </section>
+</div>
+
+<section class="panel ai-panel">
+  <div class="rec-head">
+    <h3 class="panel-title">🤖 AI Study Assistant</h3>
+    <span class="muted small">{{ 'Powered by your LLM' if ai_enabled else 'Built-in planner (add an LLM key to supercharge)' }}</span>
+  </div>
+  {% if plan %}
+    <div class="ai-source">✨ {{ plan['source'] }}</div>
+    {% if plan['weeks'] %}
+      <div class="ai-weeks">
+        {% for w in plan['weeks'] %}
+        <div class="ai-week">
+          <strong>{{ w['title'] }}</strong>
+          <ul>{% for it in w['items'] %}<li>{{ it }}</li>{% endfor %}</ul>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <pre class="ai-text">{{ plan['text'] }}</pre>
+    {% endif %}
+    <form method="post" action="{{ url_for('course_studyplan', code=course['code']) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-ghost btn-sm">↻ Regenerate plan</button>
+    </form>
+  {% else %}
+    <p class="muted small">Get a personalized 4-week study plan for this course.</p>
+    <form method="post" action="{{ url_for('course_studyplan', code=course['code']) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-accent btn-sm">✨ Generate my study plan</button>
+    </form>
+  {% endif %}
+</section>
+
+<div class="sticky-actions">
+  <a href="{{ url_for('courses') }}" class="btn btn-ghost">← All courses</a>
+  <a href="{{ url_for('my_learning') }}" class="btn btn-primary">My Learning →</a>
+</div>
+
+{% endblock %}

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign Up · EduPath</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="auth-body">
+  <div class="auth-wrap">
+    <div class="auth-hero">
+      <div class="auth-hero-inner">
+        <div class="brand-logo big">🎓</div>
+        <h1>EduPath</h1>
+        <p class="tagline">Create your student account and discover the electives that fit you best.</p>
+        <ul class="hero-points">
+          <li>✓ Personalised to your grades</li>
+          <li>✓ 14 electives analysed instantly</li>
+          <li>✓ Keep a history of recommendations</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="auth-card">
+      <h2>Create your account</h2>
+      <p class="muted">It takes less than a minute.</p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endwith %}
+
+      <form method="post" class="form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label>Full name
+          <input type="text" name="name" placeholder="Jane Perera" required autofocus>
+        </label>
+        <label>Email
+          <input type="email" name="email" placeholder="you@example.com" required>
+        </label>
+        <label>Password
+          <input type="password" name="password" placeholder="At least 4 characters" required>
+        </label>
+        <label>Confirm password
+          <input type="password" name="confirm" placeholder="Re-enter password" required>
+        </label>
+        <label class="consent-row">
+          <input type="checkbox" name="consent" value="1" required>
+          <span>I agree to the <a href="{{ url_for('privacy') }}" target="_blank">Privacy Policy</a>
+            and consent to my academic data being used for recommendations.</span>
+        </label>
+        <button class="btn btn-primary btn-block" type="submit">Create Account</button>
+      </form>
+
+      <p class="auth-switch">Already have an account? <a href="{{ url_for('login') }}">Sign in</a></p>
+    </div>
+  </div>
+</body>
+</html>

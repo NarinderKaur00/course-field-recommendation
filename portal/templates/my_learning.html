@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% set active = 'learning' %}
+{% block title %}My Learning · EduPath{% endblock %}
+{% block page_title %}My Learning{% endblock %}
+{% block page_sub %}Your enrolled courses and progress{% endblock %}
+
+{% block content %}
+
+{% if items %}
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-ico blue">📖</div>
+    <div><div class="stat-num">{{ items|length }}</div><div class="stat-lbl">Courses enrolled</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-ico green">✅</div>
+    <div><div class="stat-num">{{ avg }}%</div><div class="stat-lbl">Average progress</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-ico purple">🎯</div>
+    <div><div class="stat-num">{{ items|selectattr('pct','equalto',100)|list|length }}</div><div class="stat-lbl">Completed</div></div>
+  </div>
+</div>
+
+<div class="learn-list">
+  {% for it in items %}
+  <a href="{{ url_for('course_detail', code=it['code']) }}" class="learn-row">
+    <div class="learn-main">
+      <strong>{{ it['code'] }} — {{ it['name'] }}</strong>
+      <span class="muted small">{{ it['where'] }} · {{ it['done'] }}/{{ it['total'] }} topics</span>
+    </div>
+    <div class="learn-bar">
+      <div class="score-bar"><span style="width: {{ it['pct'] }}%"></span></div>
+    </div>
+    <div class="learn-pct">{{ it['pct'] }}%</div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="panel">
+  <div class="empty">
+    <div class="empty-ico">📚</div>
+    <p>You haven't added any courses yet.</p>
+    <a href="{{ url_for('courses') }}" class="btn btn-primary btn-sm">Browse courses</a>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

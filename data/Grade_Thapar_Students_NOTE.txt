@@ -1,0 +1,9 @@
+Grade_Thapar_Students.csv — DISCLOSURE
+=====================================
+This file is a RELABELED copy of Grade_CS_Students.csv (335 real
+students). The grade values are the original students' real grades;
+only the column headers were renamed to Thapar B.E.(CSE) 2025 course
+codes (see portal/thapar_map.py).
+
+It is a demonstration stand-in dataset, NOT real Thapar student data.
+Features: 22 core courses. Targets: 14 electives.

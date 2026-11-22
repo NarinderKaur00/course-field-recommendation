@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% set active = 'curriculum' %}
+{% block title %}Curriculum · EduPath{% endblock %}
+{% block page_title %}B.E. (CSE) Curriculum{% endblock %}
+{% block page_sub %}Core courses, Semester I → VII (2025 scheme){% endblock %}
+
+{% block content %}
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-ico blue">📚</div>
+    <div><div class="stat-num">{{ semesters|length }}</div><div class="stat-lbl">Semesters shown</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-ico purple">🎓</div>
+    <div><div class="stat-num">{{ total_credits }}</div><div class="stat-lbl">Credits (Sem I–VII)</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-ico green">🧭</div>
+    <div><div class="stat-num">4</div><div class="stat-lbl">Professional electives</div></div>
+  </div>
+</div>
+
+{% for sem in semesters %}
+<section class="panel">
+  <div class="rec-head">
+    <h3 class="panel-title">{{ sem['name'] }}</h3>
+    <span class="muted small">{{ sem['credits'] }} credits</span>
+  </div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr><th>Code</th><th>Course</th><th>Category</th><th>L-T-P</th><th>Credits</th></tr>
+      </thead>
+      <tbody>
+        {% for code, cname, cat, ltp, cr in sem['courses'] %}
+        <tr class="{{ 'row-top' if cat == 'PE' }}">
+          <td><strong>{{ code }}</strong></td>
+          <td>{{ cname }}</td>
+          <td><span class="cat-badge cat-{{ cat }}" title="{{ category_names.get(cat, cat) }}">{{ cat }}</span></td>
+          <td class="muted">{{ ltp }}</td>
+          <td class="muted">{{ cr }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endfor %}
+
+<section class="panel info-panel">
+  <h3 class="panel-title">Legend — course categories</h3>
+  <div class="legend">
+    {% for key, val in category_names.items() %}
+      <span class="legend-item"><span class="cat-badge cat-{{ key }}">{{ key }}</span> {{ val }}</span>
+    {% endfor %}
+  </div>
+  <p class="muted small" style="margin-top:12px">
+    💡 Professional Electives (highlighted rows) are chosen from the specialization tracks —
+    see <a href="{{ url_for('fields') }}">Fields &amp; Electives</a>.
+  </p>
+</section>
+
+{% endblock %}

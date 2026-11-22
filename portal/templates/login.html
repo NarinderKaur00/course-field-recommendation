@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign In · EduPath</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="auth-body">
+  <div class="auth-wrap">
+    <div class="auth-hero">
+      <div class="auth-hero-inner">
+        <div class="brand-logo big">🎓</div>
+        <h1>EduPath</h1>
+        <p class="tagline">Smart elective &amp; field recommendations, powered by your own academic results.</p>
+        <ul class="hero-points">
+          <li>✓ Predict your grade in every elective</li>
+          <li>✓ Get your best-fit subjects ranked</li>
+          <li>✓ Backed by machine learning on real data</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="auth-card">
+      <h2>Welcome back 👋</h2>
+      <p class="muted">Sign in to view your recommendations.</p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endwith %}
+
+      <form method="post" class="form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label>Email
+          <input type="email" name="email" placeholder="you@example.com" required autofocus>
+        </label>
+        <label>Password
+          <input type="password" name="password" placeholder="••••••••" required>
+        </label>
+        <button class="btn btn-primary btn-block" type="submit">Sign In</button>
+      </form>
+
+      <p class="auth-switch">New here? <a href="{{ url_for('register') }}">Create an account</a></p>
+      <p class="auth-switch muted small">🛠️ <a href="{{ url_for('admin_login') }}">Admin sign in</a></p>
+    </div>
+  </div>
+</body>
+</html>

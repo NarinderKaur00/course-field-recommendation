@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% set active = 'dashboard' %}
+{% block title %}Dashboard · EduPath{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_sub %}Your elective recommendation overview{% endblock %}
+
+{% block content %}
+
+<div class="hero-card">
+  <div class="hero-card-text">
+    <h2>Hi {{ user['name'].split()[0] }} 👋</h2>
+    <p>Enter your academic results and let EduPath predict the electives where you're most likely to excel.</p>
+    <div class="hero-actions">
+      {% if has_results %}
+        <form method="post" action="{{ url_for('recommend') }}" style="display:inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-light">✨ Generate Recommendation</button>
+        </form>
+        <a href="{{ url_for('results') }}" class="btn btn-ghost">Edit My Results</a>
+      {% else %}
+        <a href="{{ url_for('results') }}" class="btn btn-light">📝 Enter My Results</a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="hero-card-art">🧭</div>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-ico blue">📚</div>
+    <div><div class="stat-num">{{ n_subjects }}</div><div class="stat-lbl">Subjects analysed</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-ico purple">🎯</div>
+    <div><div class="stat-num">{{ n_electives }}</div><div class="stat-lbl">Electives predicted</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-ico green">🤖</div>
+    <div><div class="stat-num">{{ avg_acc }}%</div><div class="stat-lbl">Avg. model accuracy</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-ico orange">🕑</div>
+    <div><div class="stat-num">{{ rec_count }}</div><div class="stat-lbl">Recommendations made</div></div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <!-- Steps -->
+  <section class="panel">
+    <h3 class="panel-title">How it works</h3>
+    <ol class="steps">
+      <li class="{{ 'done' if has_results }}">
+        <span class="step-dot">1</span>
+        <div><strong>Enter your results</strong><p>Add your marks for past subjects.</p></div>
+      </li>
+      <li class="{{ 'done' if rec_count>0 }}">
+        <span class="step-dot">2</span>
+        <div><strong>Generate recommendation</strong><p>Our ML model predicts your elective grades.</p></div>
+      </li>
+      <li>
+        <span class="step-dot">3</span>
+        <div><strong>View your best-fit electives</strong><p>Pick with confidence.</p></div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- Latest recommendation -->
+  <section class="panel">
+    <h3 class="panel-title">Latest recommendation</h3>
+    {% if latest %}
+      <p class="muted small">Generated {{ latest_date }}</p>
+      <div class="mini-recs">
+        {% for r in latest['recommended'][:3] %}
+          <div class="mini-rec">
+            <span class="subj">{{ r['subject'] }}</span>
+            <span class="muted small">{{ r.get('field_icon','🎯') }} {{ r.get('field','') }}</span>
+            <span class="muted small">Fit {{ r['score'] }}/100</span>
+          </div>
+        {% endfor %}
+      </div>
+      <a href="{{ url_for('history') }}" class="btn btn-ghost btn-sm">View all →</a>
+    {% else %}
+      <div class="empty">
+        <div class="empty-ico">🔮</div>
+        <p>No recommendations yet.</p>
+        {% if has_results %}
+          <form method="post" action="{{ url_for('recommend') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-primary btn-sm">Generate now</button>
+          </form>
+        {% else %}
+          <a href="{{ url_for('results') }}" class="btn btn-primary btn-sm">Start by adding results</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </section>
+</div>
+
+{% endblock %}

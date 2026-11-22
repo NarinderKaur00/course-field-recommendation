@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% set active = 'history' %}
+{% block title %}Recommendations · EduPath{% endblock %}
+{% block page_title %}Recommendation History{% endblock %}
+{% block page_sub %}Every recommendation you've generated{% endblock %}
+
+{% block content %}
+
+<div class="results-toolbar">
+  <div class="muted small">🗂️ {{ items|length }} recommendation(s) on record</div>
+  <form method="post" action="{{ url_for('recommend') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn btn-primary btn-sm">✨ New Recommendation</button>
+  </form>
+</div>
+
+{% if items %}
+<div class="history-list">
+  {% for it in items %}
+  <a href="{{ url_for('recommendation', rec_id=it['id']) }}" class="history-item">
+    <div class="hi-icon">📄</div>
+    <div class="hi-main">
+      <strong>Recommendation #{{ it['id'] }}</strong>
+      <span class="muted small">{{ it['created_at'] }}</span>
+    </div>
+    <div class="hi-top">
+      {% if it['top'] %}
+        <span class="muted small">Top pick</span>
+        <span class="subj">{{ it['top']['subject'] }}</span>
+        <span class="muted small">{{ it['top'].get('field_icon','🎯') }} {{ it['top'].get('field','') }}</span>
+      {% endif %}
+    </div>
+    <div class="hi-arrow">→</div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="panel">
+  <div class="empty">
+    <div class="empty-ico">🗂️</div>
+    <p>You haven't generated any recommendations yet.</p>
+    <a href="{{ url_for('results') }}" class="btn btn-primary btn-sm">Add results to begin</a>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

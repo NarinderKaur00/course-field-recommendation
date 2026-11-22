@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% set active = 'history' %}
+{% block title %}Recommendation · EduPath{% endblock %}
+{% block page_title %}Your Elective Recommendations{% endblock %}
+{% block page_sub %}Generated {{ created_at }} · ranked by how well they fit you{% endblock %}
+
+{% block content %}
+
+<!-- Best-fit fields -->
+<section class="panel highlight-panel">
+  <div class="rec-head">
+    <h3 class="panel-title">🧭 Best-fit fields (Elective Focus) for you</h3>
+    <span class="muted small">Specialization tracks that suit you best</span>
+  </div>
+  <div class="field-rec-row">
+    {% for f in fields %}
+    <div class="field-rec rank-{{ loop.index }}">
+      <span class="field-rec-ico">{{ f['icon'] }}</span>
+      <div class="field-rec-main">
+        <strong>{{ f['field'] }}</strong>
+        <span class="muted small">Fit {{ f['avg'] }}/100 · {{ f['n'] }} elective(s)</span>
+      </div>
+      <span class="field-rec-rank">#{{ loop.index }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- Visual summary -->
+<section class="panel">
+  <h3 class="panel-title">📊 Visual summary</h3>
+  <div class="chart-grid">
+    <div class="chart-box"><canvas id="fieldRadar"></canvas></div>
+    <div class="chart-box"><canvas id="elecBar"></canvas></div>
+  </div>
+</section>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+  const fieldData = {{ fields|map(attribute='field')|list|tojson }};
+  const fieldVals = {{ fields|map(attribute='avg')|list|tojson }};
+  const elecNames = {{ rec['recommended']|map(attribute='subject')|list|tojson }};
+  const elecVals  = {{ rec['recommended']|map(attribute='score')|list|tojson }};
+  const PURPLE = '#5b5bf0';
+  new Chart(document.getElementById('fieldRadar'), {
+    type: 'radar',
+    data: { labels: fieldData, datasets: [{ label: 'Field fit', data: fieldVals,
+      backgroundColor: 'rgba(91,91,240,.18)', borderColor: PURPLE, pointBackgroundColor: PURPLE }] },
+    options: { scales: { r: { suggestedMin: 0, suggestedMax: 100 } },
+      plugins: { title: { display: true, text: 'Best-fit fields' } } }
+  });
+  new Chart(document.getElementById('elecBar'), {
+    type: 'bar',
+    data: { labels: elecNames, datasets: [{ label: 'Fit /100', data: elecVals,
+      backgroundColor: PURPLE, borderRadius: 6 }] },
+    options: { indexAxis: 'y', scales: { x: { suggestedMin: 0, suggestedMax: 100 } },
+      plugins: { legend: { display: false }, title: { display: true, text: 'Top electives (fit)' } } }
+  });
+</script>
+
+<!-- Recommended electives: fit + reason + course link (no grades) -->
+<section class="panel">
+  <h3 class="panel-title">🏆 Recommended electives for you</h3>
+  <div class="erec-list">
+    {% for r in rec['recommended'] %}
+    <div class="erec rank-{{ loop.index }}">
+      <div class="erec-rank">#{{ loop.index }}</div>
+      <div class="erec-main">
+        <div class="erec-title">
+          <strong>{{ r['subject'] }} — {{ r['name'] }}</strong>
+          <span class="field-chip">{{ r['field_icon'] }} {{ r['field'] }}</span>
+        </div>
+        <div class="erec-fit">
+          <div class="score-bar sm2"><span style="width: {{ r['score'] }}%"></span></div>
+          <span class="muted small">Fit {{ r['score'] }}/100{% if r['confidence'] %} · confidence {{ r['confidence'] }}%{% endif %}</span>
+        </div>
+        {% if r['reason'] %}<p class="erec-reason">✅ {{ r['reason'] }}</p>{% endif %}
+      </div>
+      <a href="{{ url_for('course_detail', code=r['subject']) }}" class="btn btn-primary btn-sm">📖 View course &amp; learn</a>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- Why: the factors the model weighed -->
+<section class="panel">
+  <h3 class="panel-title">🔍 Why these electives? — the factors the model weighed</h3>
+  <p class="muted small">For each elective, these are the past subjects the model relied on
+     most, and how you performed in them (your real grades).</p>
+  <div class="why-list">
+    {% for r in rec['recommended'] %}
+      {% if r['drivers'] %}
+      <div class="why-block">
+        <div class="why-head">
+          <span class="field-chip">{{ r['field_icon'] }} {{ r['field'] }}</span>
+          <strong>{{ r['subject'] }} — {{ r['name'] }}</strong>
+        </div>
+        <div class="why-drivers">
+          {% for d in r['drivers'] %}
+          <div class="why-row">
+            <span class="why-subj">{{ d['name'] }}</span>
+            <div class="why-bar"><span style="width: {{ (d['importance']*4)|round|int }}%"></span></div>
+            <span class="why-weight muted small">{{ d['importance'] }}%</span>
+            <span class="grade-pill grade-{{ d['grade_class'] }}" title="your grade in this subject">{{ d['letter'] }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+  <p class="muted small" style="margin-top:12px">
+    💡 The <strong>bar/%</strong> is how much the model weighs that subject for this elective;
+    the colored letter is <strong>your</strong> grade in it. Good grades in high-weight subjects → strong fit.
+  </p>
+</section>
+
+<div class="sticky-actions">
+  <a href="{{ url_for('history') }}" class="btn btn-ghost">← Back to history</a>
+  <a href="{{ url_for('results') }}" class="btn btn-primary">Update results</a>
+  <form method="post" action="{{ url_for('recommend') }}" style="display:inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn btn-accent">↻ Regenerate</button>
+  </form>
+</div>
+
+{% endblock %}

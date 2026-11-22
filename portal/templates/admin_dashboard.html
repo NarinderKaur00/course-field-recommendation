@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Dashboard · EduPath</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="admin-shell">
+  <header class="admin-bar">
+    <div class="admin-brand">🛠️ <strong>EduPath Admin</strong></div>
+    <a href="{{ url_for('admin_logout') }}" class="btn btn-ghost btn-sm">Sign out</a>
+  </header>
+
+  <main class="content" style="max-width:1150px;margin:0 auto">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}<div class="flash-area">
+        {% for category, message in messages %}<div class="flash flash-{{ category }}">{{ message }}</div>{% endfor %}
+      </div>{% endif %}
+    {% endwith %}
+
+    <h1 class="page-title" style="margin:6px 0 18px">Admin Dashboard</h1>
+
+    <!-- KPIs -->
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-ico blue">👥</div>
+        <div><div class="stat-num">{{ n_students }}</div><div class="stat-lbl">Registered students</div></div></div>
+      <div class="stat-card"><div class="stat-ico green">📝</div>
+        <div><div class="stat-num">{{ n_with_results }}</div><div class="stat-lbl">Entered results</div></div></div>
+      <div class="stat-card"><div class="stat-ico orange">✨</div>
+        <div><div class="stat-num">{{ n_recs }}</div><div class="stat-lbl">Recommendations made</div></div></div>
+      <div class="stat-card"><div class="stat-ico purple">🤖</div>
+        <div><div class="stat-num">{{ avg_acc }}%</div><div class="stat-lbl">Avg model accuracy</div></div></div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Dataset + retrain -->
+      <section class="panel">
+        <h3 class="panel-title">🗂️ Training dataset &amp; models</h3>
+        <ul class="kv">
+          <li><span>Dataset rows (students)</span><strong>{{ ds_rows }}</strong></li>
+          <li><span>Columns</span><strong>{{ ds_cols }}</strong></li>
+          <li><span>Input courses (features)</span><strong>{{ n_feat }}</strong></li>
+          <li><span>Electives predicted</span><strong>{{ n_elec }}</strong></li>
+        </ul>
+        <form method="post" action="{{ url_for('admin_retrain') }}" enctype="multipart/form-data" class="retrain-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <label class="muted small">Optional: upload a new student dataset (.csv) with the same columns</label>
+          <input type="file" name="dataset" accept=".csv" class="file-input">
+          <button class="btn btn-primary btn-sm" type="submit">🔄 Retrain models</button>
+          <p class="muted small">Uploaded files are validated (columns, rows, 0–100 range) before training. Leave empty to retrain on the current dataset.</p>
+        </form>
+        <a href="{{ url_for('admin_export') }}" class="btn btn-ghost btn-sm" style="margin-top:10px">⬇️ Download data backup (JSON)</a>
+      </section>
+
+      <!-- Popular fields -->
+      <section class="panel">
+        <h3 class="panel-title">🧭 Most-recommended fields</h3>
+        {% if popular %}
+          <div class="perf-list">
+            {% for p in popular %}
+            <div class="perf-row">
+              <span class="perf-subj" style="width:170px">{{ p['field'] }}</span>
+              <div class="perf-bar"><span class="good" style="width: {{ (p['count']/popular[0]['count']*100)|round|int }}%"></span></div>
+              <span class="perf-val">{{ p['count'] }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="muted">No recommendations generated yet.</p>
+        {% endif %}
+      </section>
+    </div>
+
+    <!-- Students -->
+    <section class="panel">
+      <h3 class="panel-title">👥 Students</h3>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Email</th><th>Joined</th><th>Results?</th><th>Recs</th><th>Top field</th><th>Actions</th></tr></thead>
+          <tbody>
+            {% for s in students %}
+            <tr>
+              <td><strong>{{ s['name'] }}</strong></td>
+              <td class="muted">{{ s['email'] }}</td>
+              <td class="muted">{{ s['created_at'] }}</td>
+              <td>{{ '✅' if s['has_results'] else '—' }}</td>
+              <td>{{ s['rec_count'] }}</td>
+              <td class="muted">{{ s['top_field'] or '—' }}</td>
+              <td class="row-actions">
+                <form method="post" action="{{ url_for('admin_reset_student', uid=s['id']) }}"
+                      onsubmit="return confirm('Reset {{ s['name'] }}\'s results &amp; recommendations? The account stays.');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button class="btn btn-ghost btn-xs" title="Clear results & recommendations">↺ Reset</button>
+                </form>
+                <form method="post" action="{{ url_for('admin_delete_student', uid=s['id']) }}"
+                      onsubmit="return confirm('DELETE {{ s['name'] }} and ALL their data permanently?');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button class="btn btn-danger btn-xs" title="Delete student">🗑 Delete</button>
+                </form>
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="7" class="muted">No students registered yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Model performance -->
+    <section class="panel">
+      <h3 class="panel-title">🤖 Model accuracy per elective</h3>
+      <div class="perf-list">
+        {% for p in perf %}
+        <div class="perf-row">
+          <span class="perf-subj" title="{{ p['name'] }}">{{ p['subject'] }}</span>
+          <div class="perf-bar"><span class="{{ 'good' if p['accuracy']>=80 else ('ok' if p['accuracy']>=70 else 'low') }}" style="width: {{ p['accuracy'] }}%"></span></div>
+          <span class="perf-val">{{ p['accuracy'] }}%</span>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- Audit log -->
+    <section class="panel">
+      <h3 class="panel-title">📜 Audit log (recent admin actions)</h3>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>When</th><th>Actor</th><th>Action</th><th>Detail</th></tr></thead>
+          <tbody>
+            {% for a in audit %}
+            <tr>
+              <td class="muted">{{ a['created_at'] }}</td>
+              <td><strong>{{ a['actor'] }}</strong></td>
+              <td>{{ a['action'] }}</td>
+              <td class="muted">{{ a['detail'] }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4" class="muted">No actions logged yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+</body>
+</html>

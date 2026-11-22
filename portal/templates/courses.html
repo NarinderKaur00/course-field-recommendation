@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% set active = 'courses' %}
+{% block title %}Courses · EduPath{% endblock %}
+{% block page_title %}Courses{% endblock %}
+{% block page_sub %}Browse syllabus, textbooks &amp; free learning resources{% endblock %}
+
+{% block content %}
+
+<div class="results-toolbar">
+  <div class="muted small">📖 {{ n_total }} courses · ✅ {{ n_enrolled }} in My Learning</div>
+  <input type="text" id="courseSearch" class="search-box" placeholder="🔎 Search courses…"
+         onkeyup="filterCourses()">
+</div>
+
+{% for group, items in groups.items() %}
+<section class="panel">
+  <h3 class="panel-title">{{ group }}</h3>
+  <div class="course-grid">
+    {% for c in items %}
+    <a href="{{ url_for('course_detail', code=c['code']) }}"
+       class="course-tile" data-name="{{ c['name']|lower }} {{ c['code']|lower }}">
+      <div class="course-tile-top">
+        <span class="course-code">{{ c['code'] }}</span>
+        {% if c['code'] in enrolled %}<span class="enrolled-dot" title="In My Learning">✅</span>{% endif %}
+      </div>
+      <div class="course-tile-name">{{ c['name'] }}</div>
+      <div class="course-tile-meta">
+        <span class="cat-badge cat-{{ c['category'] }}">{{ c['category'] }}</span>
+        {% if c['field'] %}<span class="muted small">{{ c['field'] }}</span>{% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endfor %}
+
+<script>
+function filterCourses(){
+  var q = document.getElementById('courseSearch').value.toLowerCase();
+  document.querySelectorAll('.course-tile').forEach(function(t){
+    t.style.display = t.getAttribute('data-name').indexOf(q) > -1 ? '' : 'none';
+  });
+  document.querySelectorAll('.panel').forEach(function(p){
+    var any = Array.from(p.querySelectorAll('.course-tile')).some(function(t){return t.style.display !== 'none';});
+    p.style.display = any ? '' : 'none';
+  });
+}
+</script>
+{% endblock %}

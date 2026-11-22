@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Sign In · EduPath</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="auth-body admin-auth">
+  <div class="auth-wrap">
+    <div class="auth-hero admin-hero">
+      <div class="auth-hero-inner">
+        <div class="brand-logo big">🛠️</div>
+        <h1>Admin Console</h1>
+        <p class="tagline">Manage the dataset, retrain models and monitor students.</p>
+        <ul class="hero-points">
+          <li>✓ View all registered students</li>
+          <li>✓ Upload a dataset &amp; retrain models</li>
+          <li>✓ Track model accuracy &amp; popular fields</li>
+        </ul>
+      </div>
+    </div>
+    <div class="auth-card">
+      <h2>Admin sign in 🔒</h2>
+      <p class="muted">Restricted area.</p>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endwith %}
+      <form method="post" class="form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label>Username
+          <input type="text" name="username" placeholder="admin" required autofocus>
+        </label>
+        <label>Password
+          <input type="password" name="password" placeholder="••••••••" required>
+        </label>
+        <button class="btn btn-primary btn-block" type="submit">Sign In</button>
+      </form>
+      <p class="auth-switch muted small">Demo login — user <strong>admin</strong> / pass <strong>admin123</strong></p>
+      <p class="auth-switch"><a href="{{ url_for('login') }}">← Student sign in</a></p>
+    </div>
+  </div>
+</body>
+</html>

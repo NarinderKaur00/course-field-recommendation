@@ -1,0 +1,13 @@
+**/__pycache__/
+*.pyc
+*.db
+portal/*.db
+test*.db
+.git/
+.zen/
+*.bat
+temp/
+experimental/
+C:/Users/HP/co544venv/
+venv/
+.venv/

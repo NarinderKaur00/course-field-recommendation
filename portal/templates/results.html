@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% set active = 'results' %}
+{% block title %}My Results · EduPath{% endblock %}
+{% block page_title %}My Academic Results{% endblock %}
+{% block page_sub %}Enter your marks (0-100). Subjects you didn't take are pre-filled with a typical value.{% endblock %}
+
+{% block content %}
+
+<form method="post" class="results-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="results-toolbar">
+    <div class="muted small">
+      💡 Tip: you only need to adjust the subjects you actually took — the rest use a sensible default.
+    </div>
+    <div class="toolbar-actions">
+      <button type="button" class="btn btn-ghost btn-sm" onclick="resetDefaults()">↺ Reset to defaults</button>
+      <button type="submit" name="action" value="save" class="btn btn-primary btn-sm">💾 Save Results</button>
+    </div>
+  </div>
+
+  {% for group, subjects in groups.items() %}
+  <section class="panel">
+    <h3 class="panel-title">{{ group }}</h3>
+    <div class="marks-grid">
+      {% for s in subjects %}
+      <div class="mark-field" title="{{ s['name'] }}">
+        <label for="{{ s['code'] }}">{{ s['code'] }}</label>
+        <span class="mark-name">{{ s['name'] }}</span>
+        <input type="number" min="0" max="100" step="1"
+               id="{{ s['code'] }}" name="{{ s['code'] }}"
+               data-default="{{ defaults[s['code']] }}"
+               value="{{ saved.get(s['code'], defaults[s['code']])|round|int }}">
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+
+  <div class="sticky-actions">
+    <a href="{{ url_for('dashboard') }}" class="btn btn-ghost">Cancel</a>
+    <button type="submit" name="action" value="save" class="btn btn-primary">💾 Save Results</button>
+    <button type="submit" name="action" value="recommend" class="btn btn-accent">✨ Save &amp; Recommend</button>
+  </div>
+</form>
+
+<script>
+function resetDefaults(){
+  document.querySelectorAll('.mark-field input').forEach(function(i){
+    i.value = i.getAttribute('data-default');
+  });
+}
+</script>
+{% endblock %}

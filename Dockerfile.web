@@ -1,0 +1,24 @@
+# ----------------------------------------------------------------------------
+# Web app (student portal) container — separate from the ZenML Dockerfile.
+# Builds the dataset + trains the models at image-build time, then serves
+# the Flask app with gunicorn.
+# ----------------------------------------------------------------------------
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Install dependencies first (better layer caching)
+COPY portal/requirements.txt /app/portal/requirements.txt
+RUN pip install --no-cache-dir -r /app/portal/requirements.txt
+
+# Copy the project
+COPY . /app
+
+# Build the relabeled dataset and train the models into portal/models/
+RUN python portal/build_thapar_dataset.py && python portal/train_models.py
+
+ENV PORT=8000
+EXPOSE 8000
+
+# gunicorn serves portal/app.py's `app` object; shell form expands ${PORT}
+CMD gunicorn --chdir portal --bind 0.0.0.0:${PORT} --workers 2 --timeout 120 app:app
