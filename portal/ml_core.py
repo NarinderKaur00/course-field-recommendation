@@ -255,19 +255,27 @@ def recommend_for_student(marks: dict, bundle, top_n: int = 5) -> dict:
         except Exception:
             confidence = None
 
+        # Fit score blends TWO things so electives don't all tie on the same
+        # number: (a) how good the predicted grade is, and (b) how CONFIDENT
+        # the model is in that prediction. Grade is weighted more (0.75) so a
+        # better predicted grade still leads, but confidence (0.25) separates
+        # electives that share the same grade band.
+        grade_score = (11 - grade_class) / 11 * 100
+        conf = confidence if confidence is not None else 70.0
+        fit = round(0.75 * grade_score + 0.25 * conf)
+
         predictions.append({
             'subject': col,
             'grade_class': grade_class,
             'letter': GRADE_LETTERS.get(grade_class, '?'),
             'gpa': GRADE_POINTS.get(grade_class, 0.0),
-            # suitability: higher = better predicted grade (0..100)
-            'score': round((11 - grade_class) / 11 * 100),
+            'score': fit,                       # 0..100, distinct per elective
             'confidence': confidence,
             'accuracy': round(bundle['accuracies'].get(col, 0) * 100),
         })
 
-    # Best predicted grade first (lower grade_class = better)
-    ranked = sorted(predictions, key=lambda p: (p['grade_class'], -(p['confidence'] or 0)))
+    # Highest blended fit first (ties fall back to the better predicted grade)
+    ranked = sorted(predictions, key=lambda p: (-p['score'], p['grade_class']))
     recommended = ranked[:top_n]
 
     return {

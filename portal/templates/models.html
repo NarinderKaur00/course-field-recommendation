@@ -43,7 +43,7 @@
   <ol class="info-steps">
     <li><strong>Preprocess</strong> — your marks are converted into grade categories (A+ … E).</li>
     <li><strong>Predict</strong> — 14 XGBoost models each predict your grade in one elective.</li>
-    <li><strong>Rank</strong> — electives are sorted by predicted grade (best first).</li>
+    <li><strong>Rank</strong> — each elective gets a fit score blending its predicted grade with the model's confidence, then they're sorted (best fit first).</li>
     <li><strong>Recommend</strong> — the top electives become your personalised suggestions.</li>
   </ol>
 </section>
