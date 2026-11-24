@@ -46,34 +46,23 @@ function toggleField(btn){
 }
 </script>
 
-<!-- Visual summary -->
-<section class="panel">
-  <h3 class="panel-title">📊 Visual summary</h3>
-  <div class="chart-grid">
-    <div class="chart-box"><canvas id="fieldRadar"></canvas></div>
-    <div class="chart-box"><canvas id="elecBar"></canvas></div>
-  </div>
+<!-- Compact top-electives chart, kept small on the side -->
+<section class="panel chart-side">
+  <h3 class="panel-title">📊 Top electives (fit)</h3>
+  <div class="chart-box-sm"><canvas id="elecBar"></canvas></div>
 </section>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
-  const fieldData = {{ fields|map(attribute='field')|list|tojson }};
-  const fieldVals = {{ fields|map(attribute='avg')|list|tojson }};
   const elecNames = {{ rec['recommended']|map(attribute='subject')|list|tojson }};
   const elecVals  = {{ rec['recommended']|map(attribute='score')|list|tojson }};
   const PURPLE = '#5b5bf0';
-  new Chart(document.getElementById('fieldRadar'), {
-    type: 'radar',
-    data: { labels: fieldData, datasets: [{ label: 'Field fit', data: fieldVals,
-      backgroundColor: 'rgba(91,91,240,.18)', borderColor: PURPLE, pointBackgroundColor: PURPLE }] },
-    options: { scales: { r: { suggestedMin: 0, suggestedMax: 100 } },
-      plugins: { title: { display: true, text: 'Best-fit fields' } } }
-  });
   new Chart(document.getElementById('elecBar'), {
     type: 'bar',
     data: { labels: elecNames, datasets: [{ label: 'Fit /100', data: elecVals,
       backgroundColor: PURPLE, borderRadius: 6 }] },
-    options: { indexAxis: 'y', scales: { x: { suggestedMin: 0, suggestedMax: 100 } },
-      plugins: { legend: { display: false }, title: { display: true, text: 'Top electives (fit)' } } }
+    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      scales: { x: { suggestedMin: 0, suggestedMax: 100 } },
+      plugins: { legend: { display: false } } }
   });
 </script>
 
