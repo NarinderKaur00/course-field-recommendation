@@ -47,28 +47,8 @@
   {% endfor %}
 </div>
 
-<h3 class="section-head">🌍 Generic Electives</h3>
-<section class="panel">
-  <div class="marks-grid">
-    {% for code, cname in generic %}
-      <div class="generic-chip"><span class="course-code">{{ code }}</span> {{ cname }}</div>
-    {% endfor %}
-  </div>
-</section>
-
-<section class="panel info-panel">
-  <h3 class="panel-title">ℹ️ How this connects to your recommendation</h3>
-  <p class="muted small">
-    The recommender predicts your grade in <strong>14 representative electives</strong> across
-    8 of these fields, then ranks the <strong>best-fit Elective-Focus fields</strong> for you.
-    Enter your marks on <a href="{{ url_for('results') }}">My Results</a> and hit
-    <em>Save &amp; Recommend</em> to see them.
-  </p>
-  <p class="muted small" style="margin-top:8px">
-    📌 Data note: the model is trained on a <strong>relabeled stand-in dataset</strong> (real
-    student grade patterns mapped onto Thapar course codes) — a demonstration dataset, not real
-    Thapar records.
-  </p>
-</section>
+<p class="muted small" style="margin-top:14px">
+  📌 Note: the model is trained on a relabeled stand-in dataset (demonstration data, not real Thapar records).
+</p>
 
 {% endblock %}
