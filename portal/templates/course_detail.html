@@ -33,6 +33,38 @@
 </section>
 {% endif %}
 
+<section class="panel ai-panel highlight-panel">
+  <div class="rec-head">
+    <h3 class="panel-title">🤖 AI Study Assistant</h3>
+    <span class="muted small">{{ 'Powered by your LLM' if ai_enabled else 'Built-in planner (add an LLM key to supercharge)' }}</span>
+  </div>
+  {% if plan %}
+    <div class="ai-source">✨ {{ plan['source'] }}</div>
+    {% if plan['weeks'] %}
+      <div class="ai-weeks">
+        {% for w in plan['weeks'] %}
+        <div class="ai-week">
+          <strong>{{ w['title'] }}</strong>
+          <ul>{% for it in w['items'] %}<li>{{ it }}</li>{% endfor %}</ul>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <pre class="ai-text">{{ plan['text'] }}</pre>
+    {% endif %}
+    <form method="post" action="{{ url_for('course_studyplan', code=course['code']) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-ghost btn-sm">↻ Regenerate plan</button>
+    </form>
+  {% else %}
+    <p class="muted small">✨ Get a personalized <strong>4-week study plan</strong> for this course, generated for you.</p>
+    <form method="post" action="{{ url_for('course_studyplan', code=course['code']) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-accent">✨ Generate my study plan</button>
+    </form>
+  {% endif %}
+</section>
+
 <div class="grid-2">
   <!-- Syllabus / progress -->
   <section class="panel">
@@ -79,38 +111,6 @@
     {% endif %}
   </section>
 </div>
-
-<section class="panel ai-panel">
-  <div class="rec-head">
-    <h3 class="panel-title">🤖 AI Study Assistant</h3>
-    <span class="muted small">{{ 'Powered by your LLM' if ai_enabled else 'Built-in planner (add an LLM key to supercharge)' }}</span>
-  </div>
-  {% if plan %}
-    <div class="ai-source">✨ {{ plan['source'] }}</div>
-    {% if plan['weeks'] %}
-      <div class="ai-weeks">
-        {% for w in plan['weeks'] %}
-        <div class="ai-week">
-          <strong>{{ w['title'] }}</strong>
-          <ul>{% for it in w['items'] %}<li>{{ it }}</li>{% endfor %}</ul>
-        </div>
-        {% endfor %}
-      </div>
-    {% else %}
-      <pre class="ai-text">{{ plan['text'] }}</pre>
-    {% endif %}
-    <form method="post" action="{{ url_for('course_studyplan', code=course['code']) }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <button class="btn btn-ghost btn-sm">↻ Regenerate plan</button>
-    </form>
-  {% else %}
-    <p class="muted small">Get a personalized 4-week study plan for this course.</p>
-    <form method="post" action="{{ url_for('course_studyplan', code=course['code']) }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <button class="btn btn-accent btn-sm">✨ Generate my study plan</button>
-    </form>
-  {% endif %}
-</section>
 
 <div class="sticky-actions">
   <a href="{{ url_for('courses') }}" class="btn btn-ghost">← All courses</a>
