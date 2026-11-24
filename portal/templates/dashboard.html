@@ -9,7 +9,7 @@
 <div class="hero-card">
   <div class="hero-card-text">
     <h2>Hi {{ user['name'].split()[0] }} 👋</h2>
-    <p>Enter your academic results and let EduPath predict the electives where you're most likely to excel.</p>
+    <p>Enter your marks and let EduPath predict the electives where you're most likely to excel.</p>
     <div class="hero-actions">
       {% if has_results %}
         <form method="post" action="{{ url_for('recommend') }}" style="display:inline">
@@ -18,7 +18,7 @@
         </form>
         <a href="{{ url_for('results') }}" class="btn btn-ghost">Edit My Results</a>
       {% else %}
-        <a href="{{ url_for('results') }}" class="btn btn-light">📝 Enter My Results</a>
+        <a href="{{ url_for('results') }}" class="btn btn-light">📝 Enter My Marks</a>
       {% endif %}
     </div>
   </div>
@@ -51,7 +51,7 @@
     <ol class="steps">
       <li class="{{ 'done' if has_results }}">
         <span class="step-dot">1</span>
-        <div><strong>Enter your results</strong><p>Add your marks for past subjects.</p></div>
+        <div><strong>Enter my marks</strong><p>Add your marks for past subjects.</p></div>
       </li>
       <li class="{{ 'done' if rec_count>0 }}">
         <span class="step-dot">2</span>
