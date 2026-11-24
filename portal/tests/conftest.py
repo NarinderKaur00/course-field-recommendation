@@ -9,6 +9,10 @@ sys.path.insert(0, PORTAL_DIR)
 
 import app as A  # noqa: E402
 import store  # noqa: E402
+import ai_assist  # noqa: E402
+
+# Tests run fully offline: never call a real LLM even if a key is in .env
+ai_assist.PROVIDER = "none"
 
 
 @pytest.fixture

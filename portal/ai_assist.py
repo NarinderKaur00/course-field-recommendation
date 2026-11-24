@@ -24,7 +24,7 @@ MODEL = os.environ.get("LLM_MODEL", "")
 _DEFAULT_MODEL = {
     "anthropic": "claude-3-5-haiku-20241022",
     "openai": "gpt-4o-mini",
-    "groq": "llama-3.3-70b-versatile",      # free, fast, OpenAI-compatible
+    "groq": "openai/gpt-oss-20b",           # free, fast, OpenAI-compatible (override with LLM_MODEL)
 }
 
 _LABEL = {
