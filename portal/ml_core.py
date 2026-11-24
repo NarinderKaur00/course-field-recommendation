@@ -1,14 +1,15 @@
 """
 ml_core.py
 ----------
-The brain of the portal. It reuses the SAME logic as the original ZenML
-pipeline (grade encoding + XGBoost per elective), but packaged so it can be:
+The brain of the portal: grade encoding + one XGBoost model per elective,
+packaged so it can be:
 
   1. trained ONCE and saved to disk          -> train_and_save()
   2. loaded instantly by the web app          -> load_bundle()
   3. used to predict + recommend electives     -> recommend_for_student()
 
-Nothing here depends on ZenML, so it runs fast and anywhere.
+It is a plain, self-contained module (scikit-learn + XGBoost) — fast to train
+and runs anywhere.
 """
 
 import os
@@ -50,7 +51,7 @@ GRADE_POINTS = {
 
 
 def encode_grade(marks):
-    """Turn a raw mark (0-100) into a grade class. Copied from the original pipeline."""
+    """Turn a raw mark (0-100) into a grade class (0 = best, 11 = fail)."""
     marks = int(marks)
     if marks > 85:
         return 0    # A+
@@ -103,9 +104,7 @@ def train_and_save(data_path: str, models_dir: str) -> dict:
 def train_bundle_from_dataframe(df, models_dir: str) -> dict:
     """
     Train one XGBoost model per elective from an in-memory DataFrame and save
-    the bundle to disk. Shared by train_and_save() AND the ZenML pipeline, so
-    the model ZenML produces is identical to the one the portal serves.
-    Returns accuracy per subject.
+    the bundle to disk. Returns accuracy per subject.
     """
     os.makedirs(models_dir, exist_ok=True)
 
@@ -142,7 +141,7 @@ def train_bundle_from_dataframe(df, models_dir: str) -> dict:
         logging.info("Training model for %s", col)
         y = targets_encoded[col]
 
-        # Balance the classes with SMOTE (same as the original pipeline)
+        # Balance the classes with SMOTE
         smote = SMOTE(k_neighbors=3)
         X_res, y_res = smote.fit_resample(features_encoded, y)
 
