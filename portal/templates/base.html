@@ -73,5 +73,59 @@
     </main>
   </div>
 </div>
+
+{% if user %}
+<!-- AI Specialization Advisor chatbot -->
+<div id="advisor">
+  <button id="advisor-fab" onclick="advisorToggle()" title="Ask the specialization advisor">🎓</button>
+  <div id="advisor-box" class="advisor-hidden">
+    <div class="advisor-head">
+      <span>🎓 Specialization Advisor</span>
+      <button onclick="advisorToggle()" class="advisor-x">✕</button>
+    </div>
+    <div id="advisor-log" class="advisor-log">
+      <div class="advisor-msg bot">Hi {{ user['name'].split()[0] }}! 👋 I can help you pick your
+        specialization. Try: <em>"Which specialization is best for me?"</em> or
+        <em>"Tell me about Data Science"</em>.</div>
+    </div>
+    <div class="advisor-chips">
+      <button onclick="advisorAsk('Which specialization is best for me?')">Best for me?</button>
+      <button onclick="advisorAsk('List all specializations')">All tracks</button>
+      <button onclick="advisorAsk('What careers are in Data Science?')">Careers</button>
+    </div>
+    <form class="advisor-form" onsubmit="advisorSend(event)">
+      <input id="advisor-input" type="text" placeholder="Ask about specializations…" autocomplete="off">
+      <button type="submit">➤</button>
+    </form>
+  </div>
+</div>
+<script>
+  const ADV_CSRF = "{{ csrf_token() }}";
+  function advisorToggle(){ document.getElementById('advisor-box').classList.toggle('advisor-hidden'); }
+  function advisorLine(text, who){
+    var log = document.getElementById('advisor-log');
+    var d = document.createElement('div');
+    d.className = 'advisor-msg ' + who;
+    d.innerHTML = text.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+    log.appendChild(d); log.scrollTop = log.scrollHeight;
+    return d;
+  }
+  function advisorSend(e){ e.preventDefault();
+    var inp = document.getElementById('advisor-input');
+    var q = inp.value.trim(); if(!q) return; inp.value='';
+    advisorAsk(q);
+  }
+  function advisorAsk(q){
+    advisorLine(q, 'me');
+    var typing = advisorLine('…', 'bot');
+    var body = new URLSearchParams(); body.append('q', q);
+    fetch('{{ url_for("advisor_ask") }}', {
+      method:'POST', headers:{'X-CSRFToken': ADV_CSRF}, body: body
+    }).then(r=>r.json()).then(d=>{
+      typing.remove(); advisorLine(d.answer || 'Sorry, try again.', 'bot');
+    }).catch(()=>{ typing.remove(); advisorLine('Network error — please try again.', 'bot'); });
+  }
+</script>
+{% endif %}
 </body>
 </html>

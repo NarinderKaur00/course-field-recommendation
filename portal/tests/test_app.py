@@ -78,6 +78,16 @@ def test_curriculum_and_fields(auth_client):
     assert b"Data Science" in auth_client.get("/fields").data
 
 
+def test_advisor_chatbot(auth_client):
+    # the AI specialization advisor answers (rule-based, no key needed)
+    r = auth_client.post("/advisor/ask", data={"q": "Tell me about Data Science"})
+    assert r.status_code == 200
+    body = r.get_json()
+    assert "Data Scientist" in body["answer"]
+    r2 = auth_client.post("/advisor/ask", data={"q": "Which specialization is best for me?"})
+    assert r2.status_code == 200 and len(r2.get_json()["answer"]) > 10
+
+
 # ---- admin ----------------------------------------------------------------
 def test_admin_protected(client):
     r = client.get("/admin", follow_redirects=True)

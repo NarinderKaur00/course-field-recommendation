@@ -59,6 +59,7 @@ from courses_data import (  # noqa: E402
     catalog_by_group, get_course, CATALOG_BY_CODE,
 )
 from ai_assist import generate_study_plan, llm_enabled as ai_llm_enabled  # noqa: E402
+import advisor  # noqa: E402  (AI specialization advisor chatbot)
 
 # ----------------------------------------------------------------------------
 # App setup
@@ -460,6 +461,27 @@ def models():
 def curriculum():
     # Curriculum is merged into the Courses page.
     return redirect(url_for("courses"))
+
+
+@app.route("/advisor/ask", methods=["POST"])
+@login_required
+def advisor_ask():
+    """AI specialization advisor — answers grounded in the student's own result."""
+    uid = session["user_id"]
+    question = (request.form.get("q") or "").strip()
+    if not question:
+        return {"answer": "Ask me anything about choosing your specialization 🙂"}
+    ctx = {"top_fields": [], "top_elective": None, "reason": None}
+    latest = store.latest_recommendation(uid)
+    if latest:
+        enriched = enrich_predictions(json.loads(latest["payload_json"]))
+        flds = recommended_fields(enriched, top_k=3)
+        ctx["top_fields"] = [{"field": f["field"], "avg": f["avg"]} for f in flds]
+        recs = enriched.get("recommended") or []
+        if recs:
+            ctx["top_elective"] = {"name": recs[0].get("name"), "subject": recs[0].get("subject")}
+            ctx["reason"] = recs[0].get("reason")
+    return {"answer": advisor.answer(question, ctx), "ai": ai_llm_enabled()}
 
 
 @app.route("/fields")
