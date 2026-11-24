@@ -456,13 +456,8 @@ def models():
 @app.route("/curriculum")
 @login_required
 def curriculum():
-    total = sum(float(s["credits"]) for s in SEMESTERS if s["credits"].replace('.', '').isdigit())
-    return render_template(
-        "curriculum.html",
-        semesters=SEMESTERS,
-        category_names=CATEGORY_NAMES,
-        total_credits=round(total, 1),
-    )
+    # Curriculum is merged into the Courses page.
+    return redirect(url_for("courses"))
 
 
 @app.route("/fields")
@@ -488,14 +483,30 @@ def _progress_done(uid, code):
     return set(json.loads(row["done_json"])) if row else set()
 
 
+def _credits(cr):
+    try:
+        return float(cr)
+    except (TypeError, ValueError):
+        return 0.0
+
+
 @app.route("/courses")
 @login_required
 def courses():
     uid = session["user_id"]
     enrolled = _enrolled_codes(uid)
+    groups = catalog_by_group()
+    # credit subtotal per semester/group + overall core-credit total
+    group_credits = {g: round(sum(_credits(c.get("cr")) for c in items), 1)
+                     for g, items in groups.items()}
+    core_credits = round(sum(v for g, v in group_credits.items() if g != "Elective"), 1)
+    n_electives = sum(1 for c in CATALOG_BY_CODE.values() if c.get("is_elective"))
     return render_template(
         "courses.html",
-        groups=catalog_by_group(),
+        groups=groups,
+        group_credits=group_credits,
+        core_credits=core_credits,
+        n_electives=n_electives,
         enrolled=enrolled,
         n_total=len(CATALOG_BY_CODE),
         n_enrolled=len(enrolled),

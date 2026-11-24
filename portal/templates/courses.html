@@ -1,20 +1,43 @@
 {% extends "base.html" %}
 {% set active = 'courses' %}
-{% block title %}Courses · EduPath{% endblock %}
-{% block page_title %}Courses{% endblock %}
-{% block page_sub %}Browse syllabus, textbooks &amp; free learning resources{% endblock %}
+{% block title %}Courses & Curriculum · EduPath{% endblock %}
+{% block page_title %}Courses &amp; Curriculum{% endblock %}
+{% block page_sub %}The full B.E. (CSE) scheme, semester by semester — click any course for its syllabus, resources &amp; progress{% endblock %}
 
 {% block content %}
 
+<!-- Overview stats -->
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-ico blue">📚</div>
+    <div><div class="stat-num">{{ n_total }}</div><div class="stat-lbl">Courses</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-ico purple">🎓</div>
+    <div><div class="stat-num">{{ core_credits }}</div><div class="stat-lbl">Core credits (Sem I–VII)</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-ico orange">🧭</div>
+    <div><div class="stat-num">{{ n_electives }}</div><div class="stat-lbl">Electives</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-ico green">✅</div>
+    <div><div class="stat-num">{{ n_enrolled }}</div><div class="stat-lbl">In My Learning</div></div>
+  </div>
+</div>
+
 <div class="results-toolbar">
-  <div class="muted small">📖 {{ n_total }} courses · ✅ {{ n_enrolled }} in My Learning</div>
+  <div class="muted small">💡 Click a course to open its syllabus, free resources and progress tracker.</div>
   <input type="text" id="courseSearch" class="search-box" placeholder="🔎 Search courses…"
          onkeyup="filterCourses()">
 </div>
 
 {% for group, items in groups.items() %}
 <section class="panel">
-  <h3 class="panel-title">{{ group }}</h3>
+  <div class="rec-head">
+    <h3 class="panel-title">{{ group }}</h3>
+    <span class="muted small">{{ items|length }} course(s){% if group_credits[group] %} · {{ group_credits[group] }} credits{% endif %}</span>
+  </div>
   <div class="course-grid">
     {% for c in items %}
     <a href="{{ url_for('course_detail', code=c['code']) }}"
@@ -24,16 +47,24 @@
         {% if c['code'] in enrolled %}<span class="enrolled-dot" title="In My Learning">✅</span>{% endif %}
       </div>
       <div class="course-tile-name">{{ c['name'] }}</div>
-      {% if c['field'] %}
       <div class="course-tile-meta">
-        <span class="muted small">{{ c['field'] }}</span>
+        {% if c['cr'] %}<span class="muted small">{{ c['cr'] }} credits</span>{% endif %}
+        {% if c['ltp'] %}<span class="muted small">· L-T-P {{ c['ltp'] }}</span>{% endif %}
+        {% if c['field'] %}<span class="muted small">· {{ c['field'] }}</span>{% endif %}
       </div>
-      {% endif %}
     </a>
     {% endfor %}
   </div>
 </section>
 {% endfor %}
+
+<section class="panel info-panel">
+  <p class="muted small">
+    💡 From Semester V you also pick <strong>Professional Electives</strong> from the specialization
+    tracks — see <a href="{{ url_for('fields') }}">Fields &amp; Electives</a>, and use
+    <a href="{{ url_for('results') }}">My Results</a> → <em>Save &amp; Recommend</em> to find your best fit.
+  </p>
+</section>
 
 <script>
 function filterCourses(){
@@ -42,6 +73,7 @@ function filterCourses(){
     t.style.display = t.getAttribute('data-name').indexOf(q) > -1 ? '' : 'none';
   });
   document.querySelectorAll('.panel').forEach(function(p){
+    if(!p.querySelector('.course-tile')) return;      // skip non-course panels
     var any = Array.from(p.querySelectorAll('.course-tile')).some(function(t){return t.style.display !== 'none';});
     p.style.display = any ? '' : 'none';
   });

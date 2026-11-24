@@ -72,7 +72,9 @@ def test_enroll_and_progress(auth_client):
 
 # ---- reference pages ------------------------------------------------------
 def test_curriculum_and_fields(auth_client):
-    assert b"Operating System" in auth_client.get("/curriculum").data
+    # /curriculum now redirects into the merged Courses & Curriculum page
+    assert b"Operating System" in auth_client.get("/curriculum", follow_redirects=True).data
+    assert b"Operating System" in auth_client.get("/courses").data
     assert b"Data Science" in auth_client.get("/fields").data
 
 
