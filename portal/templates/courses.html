@@ -24,10 +24,11 @@
         {% if c['code'] in enrolled %}<span class="enrolled-dot" title="In My Learning">✅</span>{% endif %}
       </div>
       <div class="course-tile-name">{{ c['name'] }}</div>
+      {% if c['field'] %}
       <div class="course-tile-meta">
-        <span class="cat-badge cat-{{ c['category'] }}">{{ c['category'] }}</span>
-        {% if c['field'] %}<span class="muted small">{{ c['field'] }}</span>{% endif %}
+        <span class="muted small">{{ c['field'] }}</span>
       </div>
+      {% endif %}
     </a>
     {% endfor %}
   </div>

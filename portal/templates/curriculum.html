@@ -30,14 +30,13 @@
   <div class="table-wrap">
     <table class="data-table">
       <thead>
-        <tr><th>Code</th><th>Course</th><th>Category</th><th>L-T-P</th><th>Credits</th></tr>
+        <tr><th>Code</th><th>Course</th><th>L-T-P</th><th>Credits</th></tr>
       </thead>
       <tbody>
         {% for code, cname, cat, ltp, cr in sem['courses'] %}
         <tr class="{{ 'row-top' if cat == 'PE' }}">
           <td><strong>{{ code }}</strong></td>
           <td>{{ cname }}</td>
-          <td><span class="cat-badge cat-{{ cat }}" title="{{ category_names.get(cat, cat) }}">{{ cat }}</span></td>
           <td class="muted">{{ ltp }}</td>
           <td class="muted">{{ cr }}</td>
         </tr>
@@ -49,13 +48,7 @@
 {% endfor %}
 
 <section class="panel info-panel">
-  <h3 class="panel-title">Legend — course categories</h3>
-  <div class="legend">
-    {% for key, val in category_names.items() %}
-      <span class="legend-item"><span class="cat-badge cat-{{ key }}">{{ key }}</span> {{ val }}</span>
-    {% endfor %}
-  </div>
-  <p class="muted small" style="margin-top:12px">
+  <p class="muted small">
     💡 Professional Electives (highlighted rows) are chosen from the specialization tracks —
     see <a href="{{ url_for('fields') }}">Fields &amp; Electives</a>.
   </p>
