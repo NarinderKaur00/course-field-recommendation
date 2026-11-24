@@ -230,6 +230,4 @@ def _llm_answer(question, ctx):
         f"Specialization tracks available:\n{kb_lines}\n\n"
         f"Student's question: {question}"
     )
-    if ai_assist.PROVIDER == "anthropic":
-        return ai_assist._call_anthropic(prompt).strip()
-    return ai_assist._call_openai(prompt).strip()
+    return ai_assist._call_llm(prompt).strip()

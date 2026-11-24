@@ -24,11 +24,18 @@ MODEL = os.environ.get("LLM_MODEL", "")
 _DEFAULT_MODEL = {
     "anthropic": "claude-3-5-haiku-20241022",
     "openai": "gpt-4o-mini",
+    "groq": "llama-3.3-70b-versatile",      # free, fast, OpenAI-compatible
+}
+
+_LABEL = {
+    "anthropic": "AI · Claude",
+    "openai": "AI · GPT",
+    "groq": "AI · Llama (Groq)",
 }
 
 
 def llm_enabled():
-    return PROVIDER in ("anthropic", "openai") and bool(API_KEY)
+    return PROVIDER in ("anthropic", "openai", "groq") and bool(API_KEY)
 
 
 def _prompt(course):
@@ -63,10 +70,11 @@ def _call_anthropic(prompt):
     return r.json()["content"][0]["text"]
 
 
-def _call_openai(prompt):
-    model = MODEL or _DEFAULT_MODEL["openai"]
+def _call_openai_compatible(prompt, url, default_model):
+    """Shared caller for OpenAI-format chat APIs (OpenAI + Groq)."""
+    model = MODEL or default_model
     r = requests.post(
-        "https://api.openai.com/v1/chat/completions",
+        url,
         headers={"Authorization": f"Bearer {API_KEY}", "content-type": "application/json"},
         data=json.dumps({
             "model": model, "max_tokens": 700,
@@ -76,6 +84,25 @@ def _call_openai(prompt):
     )
     r.raise_for_status()
     return r.json()["choices"][0]["message"]["content"]
+
+
+def _call_openai(prompt):
+    return _call_openai_compatible(
+        prompt, "https://api.openai.com/v1/chat/completions", _DEFAULT_MODEL["openai"])
+
+
+def _call_groq(prompt):
+    return _call_openai_compatible(
+        prompt, "https://api.groq.com/openai/v1/chat/completions", _DEFAULT_MODEL["groq"])
+
+
+def _call_llm(prompt):
+    """Dispatch to whichever provider is configured."""
+    if PROVIDER == "anthropic":
+        return _call_anthropic(prompt)
+    if PROVIDER == "groq":
+        return _call_groq(prompt)
+    return _call_openai(prompt)
 
 
 def _fallback_plan(course):
@@ -108,8 +135,8 @@ def generate_study_plan(course):
     if llm_enabled():
         try:
             prompt = _prompt(course)
-            text = _call_anthropic(prompt) if PROVIDER == "anthropic" else _call_openai(prompt)
-            label = "AI · Claude" if PROVIDER == "anthropic" else "AI · GPT"
+            text = _call_llm(prompt)
+            label = _LABEL.get(PROVIDER, "AI")
             return {"source": label, "weeks": None, "text": text.strip()}
         except Exception as e:
             fb = _fallback_plan(course)
