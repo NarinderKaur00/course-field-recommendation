@@ -35,7 +35,7 @@ def test_recommendation_flow(auth_client):
     assert r.status_code == 200
     assert b"Recommended electives for you" in r.data
     assert b"Why these electives" in r.data          # explainability
-    assert b"Top electives (fit)" in r.data           # compact chart
+    assert b"Top electives at a glance" in r.data      # compact chart
     assert b"View course" in r.data                  # course links
 
 

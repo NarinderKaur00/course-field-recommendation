@@ -46,20 +46,26 @@ function toggleField(btn){
 }
 </script>
 
-<!-- Compact top-electives chart, kept small on the side -->
-<section class="panel chart-side">
-  <h3 class="panel-title">📊 Top electives (fit)</h3>
-  <div class="chart-box-sm"><canvas id="elecBar"></canvas></div>
+<!-- Compact top-electives chart in a balanced two-column panel -->
+<section class="panel chart-panel">
+  <div class="chart-row">
+    <div class="chart-intro">
+      <h3 class="panel-title">📊 Top electives at a glance</h3>
+      <p class="muted small">Your recommended electives ranked by <strong>fit score</strong> (out of 100).
+         The longer the bar, the better the match for your marks.</p>
+    </div>
+    <div class="chart-box-sm"><canvas id="elecBar"></canvas></div>
+  </div>
 </section>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
   const elecNames = {{ rec['recommended']|map(attribute='subject')|list|tojson }};
   const elecVals  = {{ rec['recommended']|map(attribute='score')|list|tojson }};
-  const PURPLE = '#5b5bf0';
+  const BRAND = '#9e1b32';
   new Chart(document.getElementById('elecBar'), {
     type: 'bar',
     data: { labels: elecNames, datasets: [{ label: 'Fit /100', data: elecVals,
-      backgroundColor: PURPLE, borderRadius: 6 }] },
+      backgroundColor: BRAND, borderRadius: 6 }] },
     options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
       scales: { x: { suggestedMin: 0, suggestedMax: 100 } },
       plugins: { legend: { display: false } } }
