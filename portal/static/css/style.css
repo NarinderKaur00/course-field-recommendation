@@ -312,15 +312,29 @@ a{text-decoration:none;color:inherit}
 }
 .field-rec-row{display:flex;flex-direction:column;gap:10px}
 .field-rec{
-  display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--line);
-  border-radius:12px;padding:12px 16px;box-shadow:var(--shadow-sm);
+  background:#fff;border:1px solid var(--line);
+  border-radius:12px;box-shadow:var(--shadow-sm);overflow:hidden;
 }
 .field-rec.rank-1{border-color:#ffd25e;background:linear-gradient(90deg,#fffdf5,#fff)}
+.field-rec-head{
+  display:flex;align-items:center;gap:14px;width:100%;
+  background:none;border:0;cursor:pointer;padding:12px 16px;text-align:left;font:inherit;color:inherit;
+}
+.field-rec-head:hover{background:rgba(91,91,240,.04)}
 .field-rec-ico{font-size:28px}
 .field-rec-main{display:flex;flex-direction:column;flex:1}
 .field-rec-main strong{font-size:1rem}
 .field-rec-rank{font-weight:800;color:var(--primary);font-size:1.1rem}
 .field-rec.rank-1 .field-rec-rank{color:#f0a500}
+.field-rec-caret{color:var(--muted);font-size:.9rem;transition:transform .2s;margin-left:4px}
+.field-rec.open .field-rec-caret{transform:rotate(180deg)}
+.field-rec-electives{display:none;padding:0 16px 12px 58px;flex-direction:column;gap:6px}
+.field-rec.open .field-rec-electives{display:flex}
+.field-elective{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:7px 12px;background:var(--bg,#f6f7fb);border-radius:8px;
+}
+.fe-name{font-weight:600;font-size:.9rem}
 
 /* ---------------- Recommended electives list ---------------- */
 .erec-list{display:flex;flex-direction:column;gap:12px}

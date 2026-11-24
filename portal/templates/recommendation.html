@@ -15,16 +15,36 @@
   <div class="field-rec-row">
     {% for f in fields %}
     <div class="field-rec rank-{{ loop.index }}">
-      <span class="field-rec-ico">{{ f['icon'] }}</span>
-      <div class="field-rec-main">
-        <strong>{{ f['field'] }}</strong>
-        <span class="muted small">Fit {{ f['avg'] }}/100 · {{ f['n'] }} elective(s)</span>
+      <button type="button" class="field-rec-head" onclick="toggleField(this)" aria-expanded="false">
+        <span class="field-rec-ico">{{ f['icon'] }}</span>
+        <div class="field-rec-main">
+          <strong>{{ f['field'] }}</strong>
+          <span class="muted small">Fit {{ f['avg'] }}/100 · {{ f['n'] }} elective(s)</span>
+        </div>
+        <span class="field-rec-rank">#{{ loop.index }}</span>
+        <span class="field-rec-caret">▾</span>
+      </button>
+      <div class="field-rec-electives">
+        {% for e in f['electives'] %}
+        <div class="field-elective">
+          <span class="fe-name">{{ e['subject'] }} — {{ e['name'] }}</span>
+          <span class="muted small">Fit {{ e['score'] }}/100</span>
+        </div>
+        {% endfor %}
       </div>
-      <span class="field-rec-rank">#{{ loop.index }}</span>
     </div>
     {% endfor %}
   </div>
+  <p class="muted small" style="margin-top:8px">💡 Click a field (▾) to see the elective subjects inside it.</p>
 </section>
+
+<script>
+function toggleField(btn){
+  var card = btn.closest('.field-rec');
+  var open = card.classList.toggle('open');
+  btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+</script>
 
 <!-- Visual summary -->
 <section class="panel">

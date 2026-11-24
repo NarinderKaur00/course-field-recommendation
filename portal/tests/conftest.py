@@ -21,6 +21,8 @@ def client():
     """A fresh test client backed by an in-memory mongomock database."""
     store.configure(use_mock=True)
     store.reset()
+    # Pin admin creds to known test values so tests never depend on a local .env
+    A.ADMIN_USER, A.ADMIN_PASS = "admin", "admin123"
     A.app.config.update(TESTING=True, WTF_CSRF_ENABLED=False)
     with A.app.test_client() as c:
         yield c

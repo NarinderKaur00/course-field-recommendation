@@ -111,15 +111,21 @@ def recommended_fields(payload, top_k=3):
         if not field:
             continue
         scores.setdefault(field, {"field": field, "icon": info.get("icon", "🎯"),
-                                  "score_sum": 0, "n": 0, "best": None})
+                                  "score_sum": 0, "n": 0, "best": None, "electives": []})
         s = scores[field]
         s["score_sum"] += p["score"]
         s["n"] += 1
+        s["electives"].append({
+            "subject": p["subject"],
+            "name": p.get("name", info.get("name", p["subject"])),
+            "score": p["score"],
+        })
         if s["best"] is None or p["score"] > s["best"]["score"]:
             s["best"] = p
     ranked = []
     for s in scores.values():
         s["avg"] = round(s["score_sum"] / s["n"])
+        s["electives"].sort(key=lambda e: -e["score"])
         ranked.append(s)
     ranked.sort(key=lambda x: -x["avg"])
     return ranked[:top_k]
