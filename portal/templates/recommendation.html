@@ -130,12 +130,8 @@ function toggleField(btn){
 </section>
 
 <div class="sticky-actions">
-  <a href="{{ url_for('history') }}" class="btn btn-ghost">← Back to history</a>
-  <a href="{{ url_for('results') }}" class="btn btn-primary">Update results</a>
-  <form method="post" action="{{ url_for('recommend') }}" style="display:inline">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <button class="btn btn-accent">↻ Regenerate</button>
-  </form>
+  <a href="{{ url_for('history') }}" class="btn btn-ghost">← My recommendations</a>
+  <a href="{{ url_for('results') }}" class="btn btn-primary">＋ New prediction</a>
 </div>
 
 {% endblock %}

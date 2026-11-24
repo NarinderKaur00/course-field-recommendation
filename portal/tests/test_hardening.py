@@ -18,21 +18,6 @@ def test_privacy_page_public(client):
     assert r.status_code == 200 and b"Privacy Policy" in r.data
 
 
-def test_settings_export_json(auth_client):
-    r = auth_client.get("/settings/export")
-    assert r.status_code == 200
-    assert r.mimetype == "application/json"
-    payload = json.loads(r.data)
-    assert "profile" in payload and "results" in payload
-
-
-def test_self_delete_account(auth_client):
-    auth_client.post("/settings/delete", follow_redirects=True)
-    # after deletion the session is cleared -> dashboard requires login
-    r = auth_client.get("/dashboard", follow_redirects=True)
-    assert b"Sign In" in r.data or b"Sign in" in r.data
-
-
 # ---- #3 rate limiting -----------------------------------------------------
 def test_login_rate_limiting(client):
     A._LOGIN_FAILS.clear()

@@ -2,7 +2,7 @@
 {% set active = 'results' %}
 {% block title %}My Results · EduPath{% endblock %}
 {% block page_title %}My Academic Results{% endblock %}
-{% block page_sub %}Enter your marks (0-100). Subjects you didn't take are pre-filled with a typical value.{% endblock %}
+{% block page_sub %}Enter the marks you scored (0–100). Leave a subject at 0 if you didn't take it.{% endblock %}
 
 {% block content %}
 
@@ -10,10 +10,10 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <div class="results-toolbar">
     <div class="muted small">
-      💡 Tip: you only need to adjust the subjects you actually took — the rest use a sensible default.
+      💡 Enter the marks you scored in each subject. Leave any subject you didn't take at 0.
     </div>
     <div class="toolbar-actions">
-      <button type="button" class="btn btn-ghost btn-sm" onclick="resetDefaults()">↺ Reset to defaults</button>
+      <button type="button" class="btn btn-ghost btn-sm" onclick="resetDefaults()">↺ Clear all</button>
       <button type="submit" name="action" value="save" class="btn btn-primary btn-sm">💾 Save Results</button>
     </div>
   </div>

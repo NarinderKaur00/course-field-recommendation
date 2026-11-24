@@ -343,7 +343,9 @@ def results():
             raw = request.form.get(code, "").strip()
             if raw != "":
                 try:
-                    marks[code] = max(0, min(100, float(raw)))
+                    val = max(0, min(100, float(raw)))
+                    if val > 0:           # 0 / blank = subject not taken -> skip
+                        marks[code] = val
                 except ValueError:
                     pass
         store.upsert_results(uid, json.dumps(marks),
@@ -353,10 +355,10 @@ def results():
         flash("Your academic results were saved.", "success")
         return redirect(url_for("results"))
 
-    # Prefill: saved marks, else the training median (so the form is usable immediately)
+    # Form starts at 0 — the student enters the marks they actually scored.
     row = store.get_results(uid)
     saved = json.loads(row["marks_json"]) if row else {}
-    defaults = {c: round(BUNDLE["feature_medians"][c]) for c in feature_columns}
+    defaults = {c: 0 for c in feature_columns}
 
     return render_template(
         "results.html",
@@ -787,33 +789,6 @@ def admin_delete_student(uid):
 @app.route("/privacy")
 def privacy():
     return render_template("privacy.html")
-
-
-@app.route("/settings")
-@login_required
-def settings():
-    return render_template("settings.html")
-
-
-@app.route("/settings/export")
-@login_required
-def settings_export():
-    uid = session["user_id"]
-    data = store.export_user(uid)
-    from flask import Response
-    return Response(json.dumps(data, indent=2), mimetype="application/json",
-                    headers={"Content-Disposition": "attachment; filename=my_edupath_data.json"})
-
-
-@app.route("/settings/delete", methods=["POST"])
-@login_required
-def settings_delete():
-    uid = session["user_id"]
-    store.purge_student(uid)
-    store.delete_user(uid)
-    session.clear()
-    flash("Your account and all your data were permanently deleted.", "success")
-    return redirect(url_for("register"))
 
 
 # ----------------------------------------------------------------------------

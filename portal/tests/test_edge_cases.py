@@ -50,7 +50,7 @@ def test_marks_out_of_range_are_clamped(auth_client):
     auth_client.post("/results", data=data, follow_redirects=True)
     saved = _saved_marks()
     assert saved[feats[0]] == 100      # 999 -> clamped to 100
-    assert saved[feats[1]] == 0        # -50 -> clamped to 0
+    assert feats[1] not in saved       # -50 -> clamps to 0 -> treated as "not taken"
     assert saved[feats[2]] == 73
 
 
